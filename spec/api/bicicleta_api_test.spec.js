@@ -1,22 +1,48 @@
+var mongoose = require('mongoose');
 var Bicicleta = require('../../models/bicicleta');
 var request = require('request');
 var server = require('../../bin/www');
 
-
+var base_url = "http://localhost:5000/api/bicicletas";
 
 describe ('Bicicleta API', () => {
+    
+    beforeEach(function() {
+        jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000000;
+    });
+
+    afterEach(function(done) {
+        Bicicleta.deleteMany({}, function(err, success){
+            if (err) console.log(err);
+            done();
+        });
+    });
+
+
     describe ('GET BICICLETAS /', () => {
-        it('Status 200', () => {
-            expect(Bicicleta.allBicis.length).toBe(0);
-
-            var a = new Bicicleta(1, 'negro', 'urbana', [-34.7253769, -58.2515929]); // Brandsen y Mitre
-            Bicicleta.add (a);
-
-            request.get('http://localhost:5000/api/bicicletas', function(error, response, body){
+        it('Status 200 vacia', (done) => {
+            request.get(base_url, function(error, response, body){
                 expect(response.statusCode).toBe(200);
+                Bicicleta.allBicis(function(err, doc) {
+                    expect(doc.length).toBe(0);
+                    done();
+                });
+            });
+        });
+        it('Status 200 con uno', (done) => {
+            var a = new Bicicleta({code: 10, color: 'rojo', modelo: 'urbana', ubicacion: [-34, -54]});
+            Bicicleta.add (a, function(doc) {
+                request.get(base_url, function(error, response, body){
+                    expect(response.statusCode).toBe(200);
+                    Bicicleta.allBicis(function(err, doc) {
+                        expect(doc.length).toBe(1);
+                        done();
+                    });
+                });
             });
         });
     });
+
    
     describe ('POST BICICLETAS /create', () => {
         it('Status 200', (done) => {
@@ -24,11 +50,16 @@ describe ('Bicicleta API', () => {
             var aBici = { "id": 10, "color": "rojo", "modelo": "urbana", "lat":-34, "lng": -54};
             request.post({
                 headers: headers,
-                url: 'http://localhost:5000/api/bicicletas/create',
+                url: base_url + '/create',
                 body: JSON.stringify(aBici)
             }, function(error, response, body) {
                 expect(response.statusCode).toBe(200);
-                expect(Bicicleta.findById(10).color).toBe("rojo");
+                var bici = JSON.parse(body).bicicleta;
+                console.log(bici);
+                expect(bici.color).toBe(aBici.color);
+                expect(bici.modelo).toBe(aBici.modelo);
+                expect(bici.ubicacion[0]).toBe(aBici.lat);
+                expect(bici.ubicacion[1]).toBe(aBici.lng);
                 done();
             });
         });
@@ -37,20 +68,22 @@ describe ('Bicicleta API', () => {
     describe ('POST BICICLETAS /delete', () => {
         it('Status 204', (done) => {
             var headers = {'content-type' : 'application/json'};
-            var a = new Bicicleta(10, 'rojo', 'urbana', [-34, -54]);
-            var aBiciId = { "id": a.id };
+            var a = new Bicicleta({code: 10, color: 'rojo', modelo: 'urbana', ubicacion: [-34, -54]});
+            var aBiciId = { "id": a.code };
             Bicicleta.add (a);
             
             expect(Bicicleta.allBicis.length).toBe(1);
 
             request.post({
                 headers: headers,
-                url: 'http://localhost:5000/api/bicicletas/delete',
+                url: base_url + '/delete',
                 body: JSON.stringify(aBiciId)
             }, function(error, response, body) {
                 expect(response.statusCode).toBe(204);
-                expect(Bicicleta.allBicis.length).toBe(0);
-                done();
+                Bicicleta.allBicis(function(err, doc) {
+                    expect(doc.length).toBe(0);
+                    done();
+                });
             });
         });
     });
@@ -58,24 +91,25 @@ describe ('Bicicleta API', () => {
     describe ('POST BICICLETAS /update', () => {
         it('Status 200', (done) => {
             var headers = {'content-type' : 'application/json'};
-            var a = new Bicicleta(10, 'rojo', 'urbana', [-34, -54]);
-            Bicicleta.add (a);
-
-            var headers = {'content-type' : 'application/json'};
-            var updatedBici = { "id": a.id, "color": "verde", "modelo": "montaña", "lat":-33, "lng": -55};
-            request.post({
-                headers: headers,
-                url: 'http://localhost:5000/api/bicicletas/update',
-                body: JSON.stringify(updatedBici)
-            }, function(error, response, body) {
-                expect(response.statusCode).toBe(200);
-                var foundBici = Bicicleta.findById(10);
-                expect(foundBici.id).toBe(10);
-                expect(foundBici.color).toBe(updatedBici.color);
-                expect(foundBici.modelo).toBe(updatedBici.modelo);
-                expect(foundBici.ubicacion[0]).toBe(updatedBici.lat);
-                expect(foundBici.ubicacion[1]).toBe(updatedBici.lng);
-                done();
+            var a = new Bicicleta({code: 10, color: 'rojo', modelo: 'urbana', ubicacion: [-34, -54]});
+            Bicicleta.add (a, function() {
+                var headers = {'content-type' : 'application/json'};
+                var updatedBici = { "id": a.code, "color": "verde", "modelo": "montaña", "lat":-33, "lng": -55};
+                request.post({
+                    headers: headers,
+                    url: base_url + '/update',
+                    body: JSON.stringify(updatedBici)
+                }, function(error, response, body) {
+                    expect(response.statusCode).toBe(200);
+                    var foundBici = Bicicleta.findByCode(10, function(err, doc) {
+                        expect(doc.code).toBe(10);
+                        expect(doc.color).toBe(updatedBici.color);
+                        expect(doc.modelo).toBe(updatedBici.modelo);
+                        expect(doc.ubicacion[0]).toBe(updatedBici.lat);
+                        expect(doc.ubicacion[1]).toBe(updatedBici.lng);
+                        done();
+                    });
+                });
             });
         });
     });
