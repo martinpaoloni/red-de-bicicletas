@@ -7,9 +7,9 @@ var base_url = "http://localhost:5000/api/bicicletas";
 
 describe ('Bicicleta API', () => {
     
-    beforeEach(function() {
+    /*beforeEach(function() {
         jasmine.DEFAULT_TIMEOUT_INTERVAL = 1000000;
-    });
+    });*/
 
     afterEach(function(done) {
         Bicicleta.deleteMany({}, function(err, success){

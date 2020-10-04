@@ -1,24 +1,13 @@
 var mongoose = require('mongoose');
 var Bicicleta = require('../../models/bicicleta');
+var server = require('../../bin/www'); //Para Mongoose
 
 
 describe('Testing Bicicletas', function() {
-    beforeEach(function(done) {
-        var mongoDB = 'mongodb://localhost/testdb';
-        mongoose.connect(mongoDB, { useNewUrlParser: true, useUnifiedTopology: true });
-
-        const db = mongoose.connection;
-        db.on('error', console.error.bind(console, 'connection error'));
-        db.once('open', function() {
-            console.log('We are connected to test database!');
-            done();
-        });
-    });
 
     afterEach(function(done) {
         Bicicleta.deleteMany({}, function(err, success){
             if (err) console.log(err);
-            mongoose.disconnect();
             console.log('Disconnecting from test database');
             done();
         });
