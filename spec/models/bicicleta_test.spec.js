@@ -8,7 +8,6 @@ describe('Testing Bicicletas', function() {
     afterEach(function(done) {
         Bicicleta.deleteMany({}, function(err, success){
             if (err) console.log(err);
-            console.log('Disconnecting from test database');
             done();
         });
         
