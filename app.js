@@ -6,6 +6,8 @@ var logger = require('morgan');
 const passport = require('./config/passport');
 const session = require('express-session');
 
+const Usuario = require('./models/usuario');
+
 
 var indexRouter = require('./routes/index');
 var usuariosRouter = require('./routes/usuarios');
@@ -27,6 +29,8 @@ app.use(session({
 }));
 
 var mongoose = require('mongoose');
+const usuario = require('./models/usuario');
+const { token } = require('morgan');
 
 var mongoDB = 'mongodb://localhost/red_bicicletas';
 mongoose.connect(mongoDB, { useNewUrlParser: true, useUnifiedTopology: true});
@@ -70,14 +74,48 @@ app.get('/logout', function(req, res) {
 });
 
 app.get('/forgotPassword', function(req, res) {
-  //TODO completar
   res.render('session/forgotPassword');
 });
 
 app.post('/forgotPassword', function(req, res) {
-  //TODO completar
+  Usuario.findOne({ email: req.body.email }, function (err, usuario) {
+    if (!usuario) return res.render('session/forgotPassword', {info: {message: 'No existe el usuario'}});
+ 
+    usuario.resetPassword(function(err){
+      if (err) return next(err);
+      console.log('session/forgotPasswordMessage');
+    });
+
+    res.render('session/forgotPasswordMessage');
+  });
 });
 
+app.get('/resetPassword/:token',  function(req, res, next){
+  token.findOne({ token: req.params.token }, function (err, token) {
+    if (!token) return res.status(400).send({ type: 'not-verified', msg:  'No existe el token.'});
+
+    Usuario.findById(token._userId, function (err, usuario) {
+      if (!usuario) return res.status(400).send({ type: 'not-verified', msg:  'No existe un usuario al token.'});
+      res.render('session/resetPassword', {errors: {}, usuario: usuario});
+    });
+  });
+});
+
+
+app.post('/resetPassword',  function(req, res){
+  if (req.body.password != req.body.confirm_password) {
+    res.render('session/resetPassword', {errors: {confirm_password: {message: 'No coinciden los passwords.'}}});
+    return;
+  }
+  token.findOne({ token: req.params.token }, function (err, token) {
+    if (!token) return res.status(400).send({ type: 'not-verified', msg:  'No existe el token.'});
+
+    Usuario.findOne({ email: req.body.email }, function (err, usuario) {
+      usuario.password = req.body.password;
+      res.redirect('session/login');
+    });
+  });
+});
 
 app.use('/', indexRouter);
 app.use('/usuarios', usuariosRouter);

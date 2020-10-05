@@ -83,7 +83,10 @@ usuarioSchema.methods.enviar_email_bienvenida = function(cb){
         });
     });
 
-
 };
+
+usuarioSchema.methods.resetPassword = function(password){
+    //TODO
+}
 
 module.exports = mongoose.model('Usuario', usuarioSchema);
