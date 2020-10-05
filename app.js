@@ -7,6 +7,7 @@ const passport = require('./config/passport');
 const session = require('express-session');
 
 const Usuario = require('./models/usuario');
+const Token = require('./models/token');
 
 
 var indexRouter = require('./routes/index');
@@ -91,7 +92,7 @@ app.post('/forgotPassword', function(req, res) {
 });
 
 app.get('/resetPassword/:token',  function(req, res, next){
-  token.findOne({ token: req.params.token }, function (err, token) {
+  Token.findOne({ token: req.params.token }, function (err, token) {
     if (!token) return res.status(400).send({ type: 'not-verified', msg:  'No existe el token.'});
 
     Usuario.findById(token._userId, function (err, usuario) {
@@ -107,12 +108,14 @@ app.post('/resetPassword',  function(req, res){
     res.render('session/resetPassword', {errors: {confirm_password: {message: 'No coinciden los passwords.'}}});
     return;
   }
-  token.findOne({ token: req.params.token }, function (err, token) {
-    if (!token) return res.status(400).send({ type: 'not-verified', msg:  'No existe el token.'});
-
-    Usuario.findOne({ email: req.body.email }, function (err, usuario) {
-      usuario.password = req.body.password;
-      res.redirect('session/login');
+  Usuario.findOne({ email: req.body.email }, function (err, usuario) {
+    usuario.password = req.body.password;
+    usuario.save(function(err){
+      if (err) {
+        res.render('session/resetPassword', {errors: err.errors, usuario: new Usuario({ email: req.body.email })});
+      } else{
+        res.redirect('/login');    
+      }
     });
   });
 });
