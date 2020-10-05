@@ -1,0 +1,22 @@
+extends layout
+
+block content
+
+  br
+  br
+  br
+
+  h1 Login
+
+  br
+  br
+
+  form(action=`/login` method='post')
+    label(for='nombre') Nombre:
+    input#id(type='text' name='nombre')
+    br
+    label(for='password') Password:
+    input#id(type='password' name='password')
+    br
+    br
+    input.btn(type='submit' value='OK')

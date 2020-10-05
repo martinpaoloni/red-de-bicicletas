@@ -10,6 +10,7 @@ var tokenRouter = require('./routes/token');
 var bicicletasRouter = require('./routes/bicicletas');
 var bicicletasAPIRouter = require('./routes/api/bicicletas');
 var usuariosAPIRouter = require('./routes/api/usuarios');
+var loginRouter = require('./routes/login');
 
 var app = express();
 
@@ -41,6 +42,7 @@ app.use('/token', tokenRouter);
 app.use('/bicicletas', bicicletasRouter);
 app.use('/api/bicicletas', bicicletasAPIRouter);
 app.use('/api/usuarios', usuariosAPIRouter);
+app.use('/login', loginRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
