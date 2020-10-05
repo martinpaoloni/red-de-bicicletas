@@ -3,6 +3,7 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+const passport = require('./config/passport');
 
 var indexRouter = require('./routes/index');
 var usuariosRouter = require('./routes/usuarios');
@@ -10,7 +11,6 @@ var tokenRouter = require('./routes/token');
 var bicicletasRouter = require('./routes/bicicletas');
 var bicicletasAPIRouter = require('./routes/api/bicicletas');
 var usuariosAPIRouter = require('./routes/api/usuarios');
-var loginRouter = require('./routes/login');
 
 var app = express();
 
@@ -35,6 +35,27 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.get('/login', function(req, res) {
+  res.render('session/login');
+});
+
+app.post('/login', function(req, res, next) {
+  // passport
+});
+
+app.get('/logout', function(req, res) {
+  res.redirect('/');
+});
+
+app.get('/forgotPassword', function(req, res) {
+  
+});
+
+app.post('/forgotPassword', function(req, res) {
+  
+});
+
+
 app.use('/', indexRouter);
 app.use('/usuarios', usuariosRouter);
 app.use('/token', tokenRouter);
@@ -42,7 +63,6 @@ app.use('/token', tokenRouter);
 app.use('/bicicletas', bicicletasRouter);
 app.use('/api/bicicletas', bicicletasAPIRouter);
 app.use('/api/usuarios', usuariosAPIRouter);
-app.use('/login', loginRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
