@@ -4,6 +4,8 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const passport = require('./config/passport');
+const session = require('express-session');
+
 
 var indexRouter = require('./routes/index');
 var usuariosRouter = require('./routes/usuarios');
@@ -12,7 +14,17 @@ var bicicletasRouter = require('./routes/bicicletas');
 var bicicletasAPIRouter = require('./routes/api/bicicletas');
 var usuariosAPIRouter = require('./routes/api/usuarios');
 
+
+const store = new session.MemoryStore;
+
 var app = express();
+app.use(session({
+  cookie: { maxAge: 240 * 60 * 60 * 100 }, // 10 dias
+  store: store,
+  saveUninitialized: true,
+  resave: 'true',
+  secret: 'red_bicis_!!!***!!!'
+}));
 
 var mongoose = require('mongoose');
 
@@ -33,6 +45,8 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(passport.initialize());
+app.use(passport.session());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/login', function(req, res) {
@@ -40,19 +54,28 @@ app.get('/login', function(req, res) {
 });
 
 app.post('/login', function(req, res, next) {
-  // passport
+  passport.authenticate('local', function(err, usuario, info) {
+    if (err) return next(err);
+    if (!usuario) return res.render('session/login', {info});
+    req.logIn(usuario, function(err) {
+      if (err) return next(err);
+      return res.redirect('/');
+    });
+  })(req, res, next);
 });
 
 app.get('/logout', function(req, res) {
+  req.logout();
   res.redirect('/');
 });
 
 app.get('/forgotPassword', function(req, res) {
-  
+  //TODO completar
+  res.render('session/forgotPassword');
 });
 
 app.post('/forgotPassword', function(req, res) {
-  
+  //TODO completar
 });
 
 
