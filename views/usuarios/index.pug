@@ -1,14 +1,14 @@
 extends ../layout
 
 block content
-  a(href='/usuarios/create') Nuevo Usuario
+  a.btn.btn-success(href='/usuarios/create') Nuevo Usuario
 
   br
   br
 
   table.table
     thead
-      tr
+      tr  
         th(scope='col') #
         th(scope='col') Nombre
         th(scope='col') Email
@@ -18,15 +18,17 @@ block content
     tbody
       each usuario in usuarios
         tr
-          th(scope='row')
+          td(scope='row') 
             = usuario.id
           td= usuario.nombre
           td= usuario.email
           td= usuario.verificado ? 'SI' : 'NO'
           td
-            a(href='usuarios/' + usuario.id + '/update') Editar
+            a.btn(href= 'usuarios/' + usuario.id + '/update') Editar
           td
             form.inline(method='post' action='usuarios/' + usuario.id + '/delete')
-              input(type='hidden' name='id' value= usuario.id)
-              button.link-button(type='submit' name='submit_param' value='submit_value' class='btn')
-                = 'Eliminar'
+                input(type='hidden' name='id' value= usuario.id)
+                button.link-button.btn-danger(type='submit' name='submit_param' value='submit_value' class='btn')
+                    = 'Eliminar'
+
+  
