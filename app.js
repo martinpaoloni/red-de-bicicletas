@@ -13,7 +13,7 @@ var tokenRouter = require('./routes/token');
 var bicicletasRouter = require('./routes/bicicletas');
 var bicicletasAPIRouter = require('./routes/api/bicicletas');
 var usuariosAPIRouter = require('./routes/api/usuarios');
-//var authAPIRouter = require('./routes/api/auth');
+var authAPIRouter = require('./routes/api/auth');
 
 const Usuario = require('./models/usuario');
 const Token = require('./models/token');
@@ -129,6 +129,8 @@ app.use('/usuarios', usuariosRouter);
 app.use('/token', tokenRouter);
 
 app.use('/bicicletas', loggedIn, bicicletasRouter);
+
+app.use('/api/auth', authAPIRouter);
 app.use('/api/bicicletas', validarUsuario, bicicletasAPIRouter);
 app.use('/api/usuarios', usuariosAPIRouter);
 
