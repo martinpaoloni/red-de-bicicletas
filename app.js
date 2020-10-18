@@ -1,3 +1,4 @@
+require('dotenv').config();
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
@@ -37,7 +38,7 @@ var mongoose = require('mongoose');
 const usuario = require('./models/usuario');
 const { token } = require('morgan');
 
-var mongoDB = 'mongodb://localhost/red_bicicletas';
+var mongoDB = process.env.MONGO_URI;
 mongoose.connect(mongoDB, { useNewUrlParser: true, useUnifiedTopology: true});
 mongoose.Promise = global.Promise;
 var db = mongoose.connection;
