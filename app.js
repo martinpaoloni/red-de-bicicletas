@@ -157,8 +157,8 @@ app.use('/googlebc40d2da950016bb', function(req, res) {
 
 app.get('/auth/google',
     passport.authenticate('google', {  scope:  [
-      'https://www.googleapis.com/auth/plus.login',
-      'https://www.googleapis.com/auth/plus.profile.emails.read' ] } ));
+      'email',
+      'profile' ] } ));
 
 app.get('/auth/google/callback', passport.authenticate( 'google', {
       successRedirect: '/',
